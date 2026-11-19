@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Motion Arena</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Hauptmenü -->
+    <section id="screen-menu" class="screen active">
+      <header class="menu-header">
+        <h1>MOTION<span>ARENA</span></h1>
+        <div class="profile-bar">
+          <label>Profil
+            <select id="profile-select"></select>
+          </label>
+          <button id="btn-new-profile" class="btn ghost">+ Neu</button>
+          <button id="btn-settings" class="btn ghost">Einstellungen</button>
+        </div>
+      </header>
+      <div class="mode-panel">
+        <span class="mode-label">Spielmodi</span>
+        <div class="mode-switch" role="group" aria-label="Spielmodi">
+          <button id="btn-mode-camera" class="mode-btn">📷 Kamera</button>
+          <button id="btn-mode-mouse" class="mode-btn">🖱️ Maus</button>
+        </div>
+        <span id="mode-status" class="mode-status"></span>
+      </div>
+      <div id="game-tiles" class="tiles"></div>
+    </section>
+
+    <!-- Einstellungen -->
+    <section id="screen-settings" class="screen">
+      <h2>Einstellungen</h2>
+      <div class="settings-grid">
+        <label><input type="checkbox" id="set-camera"> Webcam-Steuerung</label>
+        <label><input type="checkbox" id="set-mirror"> Spiegelmodus</label>
+        <label>Kamerabild im Spiel
+          <select id="set-camera-view">
+            <option value="overlay">Halbtransparent über dem Spielfeld</option>
+            <option value="corner">Vorschau unten rechts</option>
+            <option value="off">Aus</option>
+          </select>
+        </label>
+        <label>Deckkraft Kamerabild <input type="range" id="set-camera-opacity" min="0.05" max="0.9" step="0.05"> <output id="out-camera-opacity"></output></label>
+        <label>Sensitivität <input type="range" id="set-sensitivity" min="0.5" max="2" step="0.05"> <output id="out-sensitivity"></output></label>
+        <label>Standard-Schwierigkeit
+          <select id="set-difficulty">
+            <option value="easy">Leicht</option>
+            <option value="normal">Normal</option>
+            <option value="hard">Schwer</option>
+          </select>
+        </label>
+      </div>
+      <p id="camera-error" class="error" hidden></p>
+      <button id="btn-settings-back" class="btn">Zurück</button>
+    </section>
+
+    <!-- Spiel-Setup (Schwierigkeit + Optionen pro Modus) -->
+    <section id="screen-setup" class="screen">
+      <div class="setup-card">
+        <h2 id="setup-title"></h2>
+        <p id="setup-description" class="muted"></p>
+        <div id="setup-options" class="settings-grid"></div>
+        <div id="setup-scores" class="score-table"></div>
+        <div class="overlay-actions">
+          <button id="btn-setup-start" class="btn">Start</button>
+          <button id="btn-setup-back" class="btn ghost">Zurück</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Spiel -->
+    <section id="screen-game" class="screen">
+      <canvas id="game-canvas"></canvas>
+      <!-- Halbtransparentes Kamerabild, deckungsgleich mit den Tracking-Koordinaten -->
+      <div id="camera-overlay" class="camera-overlay" hidden></div>
+      <div id="hud" class="hud"></div>
+      <button id="btn-pause" class="btn ghost hud-pause">II</button>
+      <div id="overlay" class="overlay" hidden>
+        <div class="overlay-card">
+          <h2 id="overlay-title"></h2>
+          <p id="overlay-text"></p>
+          <div class="overlay-actions">
+            <button id="btn-resume" class="btn">Weiter</button>
+            <button id="btn-restart" class="btn ghost">Neustart</button>
+            <button id="btn-menu" class="btn ghost">Menü</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Kameravorschau (wird vom CameraTracker befüllt) -->
+    <div id="camera-preview" class="camera-preview" hidden></div>
+  </div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
