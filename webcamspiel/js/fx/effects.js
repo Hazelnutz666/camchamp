@@ -3,6 +3,13 @@
 const TAU = Math.PI * 2;
 const rand = (a, b) => a + Math.random() * (b - a);
 
+// Removes items failing keep() without allocating a new array (runs every frame).
+function compact(list, keep) {
+  let n = 0;
+  for (const item of list) if (keep(item)) list[n++] = item;
+  list.length = n;
+}
+
 export class Particles {
   constructor(max = 800) {
     this.max = max;
@@ -37,7 +44,7 @@ export class Particles {
       p.x += p.vx * dt; p.y += p.vy * dt;
       p.life -= dt;
     }
-    this.list = this.list.filter((p) => p.life > 0);
+    compact(this.list, (p) => p.life > 0);
   }
 
   render(ctx) {
@@ -63,7 +70,7 @@ export class FloatingTexts {
 
   update(dt) {
     for (const t of this.list) { t.y -= t.rise * dt; t.life -= dt; }
-    this.list = this.list.filter((t) => t.life > 0);
+    compact(this.list, (t) => t.life > 0);
   }
 
   render(ctx) {

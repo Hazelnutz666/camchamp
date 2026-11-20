@@ -13,7 +13,17 @@ python dev/serve.py 8000
 ```
 
 `localhost` gilt als sicherer Kontext, daher funktioniert die Webcam ohne HTTPS.
-HTTPS (für Tests vom Handy/LAN) folgt später.
+
+### HTTPS im LAN (Handy, Tablet, anderer PC)
+
+```powershell
+.\start-dev.ps1 -Https          # oder: python dev/serve.py 8000 --https
+```
+
+Der Server lauscht dann auf allen Netzwerkkarten und gibt die LAN-Adressen aus (z. B. `https://192.168.2.157:8007`).
+Beim ersten Start wird mit `openssl` (aus Git for Windows) ein selbstsigniertes Zertifikat für localhost,
+den Rechnernamen und alle LAN-IPs in `dev/certs/` erzeugt (nicht im Git) und bei geänderter IP neu erstellt.
+Auf dem Gerät die Zertifikatswarnung einmal bestätigen. Die Windows-Firewall muss Python im privaten Netz erlauben.
 
 MediaPipe (`@mediapipe/tasks-vision@0.10.14`) und die Modelle werden beim Aktivieren der Webcam
 per CDN geladen – dafür ist Internet nötig. Ohne Kamera läuft alles per Maus/Tastatur.
@@ -67,5 +77,5 @@ js/games/             baseGame.js (Vertrag), registry.js, ein Ordner pro Spielmo
 - [x] Kamerabild standardmäßig halbtransparent als Vollbild-Ebene über/unter dem Spielfeld, damit man sieht, wo sich Hände/Gelenke relativ zum Spielgeschehen bewegen
 - [x] Einstellungen: Kameraanzeige wählbar – „halbtransparent Vollbild“ (Standard) oder „Vorschau unten rechts“
 - [x] Einstellungen: Transparenz des Kamerabilds per Regler einstellbar
-- [ ] Partikel/Animationen, Performance-Feinschliff
-- [ ] HTTPS für LAN-Tests
+- [x] Partikel/Animationen, Performance-Feinschliff (statische Hintergründe als gecachte Ebenen, Zuschauer gebündelt gezeichnet, Partikel ohne Array-Neuanlage, Screen-/Overlay-/Kachel-Animationen, `prefers-reduced-motion`)
+- [x] HTTPS für LAN-Tests (`start-dev.ps1 -Https`)

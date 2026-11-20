@@ -34,29 +34,54 @@ function crowdPattern(n) {
   const colors = ['#ff3d7f', '#2de2e6', '#ffd23d', '#ffffff', '#3ddc84', '#8e44ad'];
   return Array.from({ length: n }, () => ({ x: rnd(), y: rnd(), c: colors[(rnd() * colors.length) | 0] }));
 }
-const CROWD = crowdPattern(900);
+// Grouped by color: one fill per color instead of 900 fillStyle switches per frame.
+const CROWD = Object.entries(crowdPattern(900).reduce((groups, p) => {
+  (groups[p.c] ??= []).push(p);
+  return groups;
+}, {}));
 
+// Static parts are cached as layers (view.drawLayer); only the bobbing crowd is drawn per frame.
 export function drawStadium(ctx, P, time) {
-  const { width: w, height: h } = P.view;
+  P.view.drawLayer(ctx, 'penalty-sky', (lctx) => drawSky(lctx, P));
+  drawCrowd(ctx, P, time);
+  P.view.drawLayer(ctx, 'penalty-pitch', (lctx) => { drawPitch(lctx, P); drawGoalBack(lctx, P); });
+}
+
+const standTopOf = (P) => P.horizon * 0.35;
+
+function drawSky(ctx, P) {
+  const { width: w } = P.view;
   const hz = P.horizon;
   const sky = ctx.createLinearGradient(0, 0, 0, hz);
   sky.addColorStop(0, '#060814');
   sky.addColorStop(1, '#1a2340');
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, w, hz);
-
-  // stand + crowd
-  const standTop = hz * 0.35;
+  const standTop = standTopOf(P);
   ctx.fillStyle = '#141a30';
   ctx.fillRect(0, standTop, w, hz - standTop);
-  for (const p of CROWD) {
-    const y = standTop + p.y * (hz - standTop - 4);
-    const bob = Math.sin(time * 6 + p.x * 40) * 1.2;
-    ctx.fillStyle = p.c;
-    ctx.globalAlpha = 0.55;
-    ctx.fillRect(p.x * w, y + bob, 3, 3);
+}
+
+function drawCrowd(ctx, P, time) {
+  const { width: w } = P.view;
+  const hz = P.horizon;
+  const standTop = standTopOf(P);
+  ctx.globalAlpha = 0.55;
+  for (const [color, people] of CROWD) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    for (const p of people) {
+      const y = standTop + p.y * (hz - standTop - 4);
+      ctx.rect(p.x * w, y + Math.sin(time * 6 + p.x * 40) * 1.2, 3, 3);
+    }
+    ctx.fill();
   }
   ctx.globalAlpha = 1;
+}
+
+function drawPitch(ctx, P) {
+  const { width: w, height: h } = P.view;
+  const hz = P.horizon;
 
   // floodlights
   for (const lx of [0.12, 0.88]) {
@@ -91,7 +116,7 @@ export function drawStadium(ctx, P, time) {
   ctx.fill();
 }
 
-export function drawGoalBack(ctx, P) {
+function drawGoalBack(ctx, P) {
   const hw = GOAL_W / 2;
   const back = GOAL_Z + NET_DEPTH;
   ctx.strokeStyle = 'rgba(255,255,255,.28)';

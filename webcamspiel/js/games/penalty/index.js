@@ -1,6 +1,6 @@
 import { BaseGame } from '../baseGame.js';
 import { Particles, FloatingTexts, drawCenterText, drawHint, cameraLost } from '../../fx/effects.js';
-import { Projector, GOAL_Z, GOAL_W, GOAL_H, BALL_R, drawStadium, drawGoalBack, drawGoalFrame, drawBall, drawKeeper } from './scene.js';
+import { Projector, GOAL_Z, GOAL_W, GOAL_H, BALL_R, drawStadium, drawGoalFrame, drawBall, drawKeeper } from './scene.js';
 import { Keeper, KEEPER_DIFFICULTY } from './keeper.js';
 import { KickDetector, LEG_BONES } from './kickDetector.js';
 
@@ -264,8 +264,7 @@ export default class Penalty extends BaseGame {
 
   render(ctx) {
     const P = this.P;
-    drawStadium(ctx, P, this.time);
-    drawGoalBack(ctx, P);
+    drawStadium(ctx, P, this.time); // includes the goal's back net
     const behind = this.ball.z > GOAL_Z;
     if (behind) drawBall(ctx, P, this.ball, this.time);
     drawKeeper(ctx, P, { x: this.keeper.x, lift: this.keeper.lift, handL: this.keeper.handL, handR: this.keeper.handR, lean: this.keeper.lean });

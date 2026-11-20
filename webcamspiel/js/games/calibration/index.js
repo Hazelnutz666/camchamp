@@ -105,11 +105,13 @@ export default class Calibration extends BaseGame {
 
   render(ctx) {
     const { width: w, height: h } = this.view;
-    const bg = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.7);
-    bg.addColorStop(0, '#16203a');
-    bg.addColorStop(1, '#0b0d17');
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, w, h);
+    this.view.drawLayer(ctx, 'calibration-bg', (l) => {
+      const bg = l.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.7);
+      bg.addColorStop(0, '#16203a');
+      bg.addColorStop(1, '#0b0d17');
+      l.fillStyle = bg;
+      l.fillRect(0, 0, w, h);
+    });
 
     const r = Math.max(22, Math.min(w, h) * 0.05);
     TARGETS.forEach((t, i) => this.drawTarget(ctx, t, i, r));

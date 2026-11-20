@@ -28,6 +28,10 @@ export function hoopGeometry(view, pos, rimFactor) {
 }
 
 export function drawCourt(ctx, view) {
+  view.drawLayer(ctx, 'basketball-court', (lctx) => drawCourtStatic(lctx, view));
+}
+
+function drawCourtStatic(ctx, view) {
   const { width: w, height: h } = view;
   const bg = ctx.createLinearGradient(0, 0, 0, h);
   bg.addColorStop(0, '#101a3a');

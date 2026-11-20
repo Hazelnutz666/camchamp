@@ -29,6 +29,10 @@ export class Projector {
 }
 
 export function drawCourt(ctx, P) {
+  P.view.drawLayer(ctx, 'tennis-court', (lctx) => drawCourtStatic(lctx, P));
+}
+
+function drawCourtStatic(ctx, P) {
   const { width: w, height: h } = P.view;
   const hz = P.horizon;
   const sky = ctx.createLinearGradient(0, 0, 0, hz);

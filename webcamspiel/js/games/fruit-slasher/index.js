@@ -218,11 +218,13 @@ export default class FruitSlasher extends BaseGame {
 
   render(ctx) {
     const { width: w, height: h } = this.view;
-    const bg = ctx.createRadialGradient(w / 2, h * 0.4, h * 0.1, w / 2, h / 2, Math.max(w, h) * 0.8);
-    bg.addColorStop(0, '#2a1840');
-    bg.addColorStop(1, '#0b0d17');
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, w, h);
+    this.view.drawLayer(ctx, 'fruit-bg', (l) => {
+      const bg = l.createRadialGradient(w / 2, h * 0.4, h * 0.1, w / 2, h / 2, Math.max(w, h) * 0.8);
+      bg.addColorStop(0, '#2a1840');
+      bg.addColorStop(1, '#0b0d17');
+      l.fillStyle = bg;
+      l.fillRect(0, 0, w, h);
+    });
 
     this.shake.apply(ctx);
     for (const hf of this.halves) drawHalf(ctx, hf);
