@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-`claudestuff/` is its own git repo (remote `origin` = GitHub `Hazelnutz666/camchamp`, branch `master`). It currently contains one project, `webcamspiel/`. Its requirements are in `webcamspiel/GAME DEVELOPMENT PROMPT.md` (German) — the source of truth; progress checklist is in `webcamspiel/README.md`. UI text is German.
+`claudestuff/` is its own git repo (remote `origin` = GitHub `Hazelnutz666/camchamp`, branch `main`). It currently contains one project, `webcamspiel/`. Its requirements are in `webcamspiel/GAME DEVELOPMENT PROMPT.md` (German) — the source of truth; progress checklist is in `webcamspiel/README.md`. UI text is German.
 
 ## webcamspiel — webcam motion-control multisport game
 
