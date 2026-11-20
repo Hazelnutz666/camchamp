@@ -26,6 +26,7 @@ export class CameraTracker {
     this.active = { hands: true, pose: false };
     this.lastVideoTime = -1;
     this.handTrackers = [new PointerTracker('hand-0', 'camera'), new PointerTracker('hand-1', 'camera')];
+    this.rawHands = [null, null]; // index fingertip, mirrored only (no sensitivity/calibration) – for the calibration step
     this.poseLandmarks = null;
     this.running = false;
   }
@@ -101,22 +102,27 @@ export class CameraTracker {
     this.pose?.close(); this.pose = null;
     this.video = null;
     this.handTrackers.forEach((t) => t.lose());
+    this.rawHands = [null, null];
     this.poseLandmarks = null;
+  }
+
+  // Mirror only – the input space of the calibration fit (see js/games/calibration/fit.js).
+  mirrored(lm) {
+    return { x: this.settings.get('mirror') ? 1 - lm.x : lm.x, y: lm.y };
   }
 
   // Raw MediaPipe coords (0..1, camera space) → game coords with mirror/calibration/sensitivity.
   transform(lm) {
     const { offsetX, offsetY, scale } = this.settings.get('calibration');
     const s = this.settings.get('sensitivity') * scale;
-    let x = this.settings.get('mirror') ? 1 - lm.x : lm.x;
-    let y = lm.y;
+    let { x, y } = this.mirrored(lm);
     x = 0.5 + (x - 0.5 + offsetX) * s;
     y = 0.5 + (y - 0.5 + offsetY) * s;
     return { x: Math.min(1, Math.max(0, x)), y: Math.min(1, Math.max(0, y)), z: lm.z, visibility: lm.visibility };
   }
 
   update(dt) {
-    if (!this.running || this.video.readyState < 2) return { pointers: [], pose: null };
+    if (!this.running || this.video.readyState < 2) return { pointers: [], pose: null, rawHands: [] };
     if (this.video.currentTime !== this.lastVideoTime) {
       this.lastVideoTime = this.video.currentTime;
       const now = performance.now();
@@ -126,6 +132,7 @@ export class CameraTracker {
     return {
       pointers: this.handTrackers.filter((t) => t.visible).map((t) => t.snapshot()),
       pose: this.poseLandmarks,
+      rawHands: this.rawHands.filter(Boolean),
     };
   }
 
@@ -135,8 +142,10 @@ export class CameraTracker {
       if (hands[i]) {
         const p = this.transform(hands[i][INDEX_TIP]);
         tracker.feed(p.x, p.y, dt);
+        this.rawHands[i] = this.mirrored(hands[i][INDEX_TIP]);
       } else {
         tracker.lose();
+        this.rawHands[i] = null;
       }
     });
   }

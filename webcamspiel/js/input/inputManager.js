@@ -10,6 +10,7 @@ import { CameraTracker, CameraError } from './cameraTracker.js';
  *   pointers: [{ id, source, x, y, vx, vy, speed, down }],  // normalized 0..1, velocity in units/s
  *   pose:     null | Array<{ x, y, z, visibility }>,        // 33 MediaPipe pose landmarks, normalized
  *   keys:     { held: Set<code>, pressed: Set<code> },     // KeyboardEvent.code
+ *   rawHands: [{ x, y }],  // camera index fingertips, mirrored only – used by the calibration step
  * }
  *
  * In camera mode, mouse pointers are still merged in so the mouse always works as a fallback.
@@ -57,11 +58,12 @@ export class InputManager {
 
   update(dt) {
     const mousePointers = this.mouse.update(dt);
-    const cam = this.source === 'camera' ? this.camera.update(dt) : { pointers: [], pose: null };
+    const cam = this.source === 'camera' ? this.camera.update(dt) : { pointers: [], pose: null, rawHands: [] };
     return {
       source: this.source,
       pointers: [...cam.pointers, ...mousePointers],
       pose: cam.pose,
+      rawHands: cam.rawHands,
       keys: this.keyboard.update(),
     };
   }

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-`claudestuff/` lives inside the larger `mydevwork` git repo (repo root is the parent directory). It currently contains one project, `webcamspiel/`. Its requirements are in `webcamspiel/GAME DEVELOPMENT PROMPT.md` (German) — the source of truth; progress checklist is in `webcamspiel/README.md`. UI text is German.
+`claudestuff/` is its own git repo (remote `origin` = GitHub `Hazelnutz666/camchamp`, branch `master`). It currently contains one project, `webcamspiel/`. Its requirements are in `webcamspiel/GAME DEVELOPMENT PROMPT.md` (German) — the source of truth; progress checklist is in `webcamspiel/README.md`. UI text is German.
 
 ## webcamspiel — webcam motion-control multisport game
 
@@ -34,6 +34,7 @@ Serve over `http://localhost` only for now (secure context for `getUserMedia`); 
 - `CameraTracker.transform()` is the one place where mirror mode, sensitivity, and `settings.calibration` are applied to landmarks. Hand pointers use the index fingertip (landmark 8). The pose (33 landmarks) is only computed when a game's `meta.tracking.pose` is true. The Pose Landmarker is expensive and only needed for the penalty shootout.
 - Game modes: `js/games/<id>/index.js` default-exports a `BaseGame` subclass with `static meta` (id, title, description, color, tracking, options), registered in `js/games/registry.js`. The menu tiles, highscores, and stats derive from the registry. The lifecycle contract is documented in `js/games/baseGame.js`. Games draw in CSS pixels via `env.view` (`CanvasView`, DPR-aware) and show scores through `env.hud.set({...})`.
 - Flow: menu tile → `SetupScreen` (difficulty plus `meta.options`, given as `{ key: { label, default, choices } }`; the last choice per game is saved in `settings.gameConfigs`) → `app.startGame(Game, config)`. The game receives the resolved values as `env.options` and the difficulty as `env.difficulty`.
+- Calibration (`js/games/calibration/`) is a `BaseGame` with `meta.utility: true`, so it is not in the registry. The settings screen starts it via `app.startGame`. On finish, the app skips highscores and returns to settings. While collecting, it sets `settings.calibration` to identity. It reads `InputState.rawHands` (mirrored only) and least-squares fits `{offsetX, offsetY, scale}` in `fit.js`. If it is left early, `destroy()` restores the previous values.
 - `Profiles.recordStats` sums numeric stats, except keys that start with `best`, which keep the maximum.
 - `js/fx/effects.js` holds the shared particles, floating texts, screen shake, center text, and `formatTime`. Fruit Slasher (`js/games/fruit-slasher/`) is the reference implementation: a countdown → play → over phase machine, physics relative to screen height, a `DIFFICULTY` table, and blade speed measured over a ~60 ms window because the camera delivers ~30 fps while rendering runs at 60.
 - Penalty and Tennis are pseudo-3D: each `scene.js` has a `Projector` (world meters → screen) with near-plane clipping where needed. Mouse and hand input is mapped into the world via `unproject` onto a plane (Penalty: the goal plane; Tennis: the moving hitting plane `hitZ`, which moves forward for short balls).

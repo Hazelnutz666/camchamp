@@ -1,8 +1,9 @@
 import { $ } from './screens.js';
+import { describeCalibration, isIdentity, IDENTITY } from '../games/calibration/fit.js';
 
 // Binds the settings form to Settings. Camera on/off goes through the shared setCamera callback.
 export class SettingsScreen {
-  constructor({ settings, setCamera, onBack }) {
+  constructor({ settings, setCamera, onCalibrate, onBack }) {
     this.settings = settings;
 
     const mirror = $('set-mirror');
@@ -22,7 +23,19 @@ export class SettingsScreen {
     cam.checked = settings.get('useCamera');
     cam.addEventListener('change', () => setCamera(cam.checked));
 
+    $('btn-calibrate').addEventListener('click', onCalibrate);
+    $('btn-calibration-reset').addEventListener('click', () => settings.set('calibration', { ...IDENTITY }));
+    settings.onChange((key) => { if (key === 'calibration') this.renderCalibration(); });
+    this.renderCalibration();
+    this.syncSource('mouse', null);
+
     $('btn-settings-back').addEventListener('click', onBack);
+  }
+
+  renderCalibration() {
+    const c = this.settings.get('calibration');
+    $('out-calibration').textContent = describeCalibration(c);
+    $('btn-calibration-reset').disabled = isIdentity(c);
   }
 
   bindRange(inputId, outputId, key, format) {
@@ -41,6 +54,9 @@ export class SettingsScreen {
     const cam = $('set-camera');
     cam.checked = pending || source === 'camera';
     cam.disabled = pending;
+    const ready = source === 'camera' && !pending;
+    $('btn-calibrate').disabled = !ready;
+    $('calibration-hint').hidden = ready;
     const el = $('camera-error');
     el.hidden = !error;
     el.textContent = error ? `${error.message} – Maussteuerung aktiv.` : '';

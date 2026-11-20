@@ -40,6 +40,7 @@ js/core/              App-Steuerung, Loop, Canvas, Settings, Profile, Highscores
 js/input/             InputManager (vereinheitlicht), Maus, Tastatur, CameraTracker (MediaPipe)
 js/ui/                Menü, Einstellungen, HUD, Screen-Wechsel
 js/games/             baseGame.js (Vertrag), registry.js, ein Ordner pro Spielmodus
+                      calibration/ = Kalibrierung (nicht im Menü, Start aus den Einstellungen)
 ```
 
 ## Neuen Spielmodus hinzufügen
@@ -56,7 +57,7 @@ js/games/             baseGame.js (Vertrag), registry.js, ein Ordner pro Spielmo
 - [x] Setup-Screen pro Modus (Schwierigkeit, Optionen, Bestenliste)
 - [x] Eingabe-Abstraktion: Maus/Touch, Tastatur, Webcam (Hand + Pose) mit automatischem Maus-Fallback
 - [x] Fruit Slasher (Zeitlimit, Leben, Bomben, Combos, 3 Schwierigkeiten)
-- [ ] Kalibrierungsmodus (Werte `settings.calibration` werden schon angewendet)
+- [x] Kalibrierungsmodus (Einstellungen → „Kalibrieren“: 5 Zielpunkte mit dem Zeigefinger anzeigen, Versatz + Reichweite werden per Ausgleichsrechnung bestimmt; „Zurücksetzen“ stellt den Standard wieder her)
 - [x] Basketball (Fangen + Wurf per Schwung, Ring/Brett-Physik, Netz, Dreier, Swish, Serien, wandernder Korb)
 - [x] Elfmeterschießen (Egoperspektive, Schuss per Fuß-Kick via Pose, Maus/Tastatur mit Kraftbalken, Torwart-KI mit Reaktion + Antizipation der Lieblingsecke, Runden)
 - [x] Tennis (Egoperspektive, Schläger per Hand, Richtung/Tempo/Spin aus der Schwungbewegung, Gegner-KI, 15/30/40/Einstand, Spiele, Sätze, Tiebreak, Match)

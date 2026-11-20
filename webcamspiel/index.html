@@ -54,6 +54,15 @@
           </select>
         </label>
       </div>
+      <div class="calibration-box">
+        <h3>Kalibrierung</h3>
+        <p>Aktuell: <output id="out-calibration"></output></p>
+        <p id="calibration-hint" class="muted">Webcam-Steuerung aktivieren, um zu kalibrieren.</p>
+        <div class="overlay-actions start">
+          <button id="btn-calibrate" class="btn">Kalibrieren</button>
+          <button id="btn-calibration-reset" class="btn ghost">Zurücksetzen</button>
+        </div>
+      </div>
       <p id="camera-error" class="error" hidden></p>
       <button id="btn-settings-back" class="btn">Zurück</button>
     </section>

@@ -4,6 +4,8 @@
 import { GAMES } from '../js/games/registry.js';
 import { ballRadius } from '../js/games/basketball/court.js';
 import { stepBall } from '../js/games/tennis/physics.js';
+import Calibration, { TARGETS } from '../js/games/calibration/index.js';
+import { fitCalibration } from '../js/games/calibration/fit.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const DT = 1 / 60;
@@ -65,6 +67,55 @@ const CHECKS = {
   },
 };
 
+// Calibration: the fit must recover a known calibration, and the full flow (simulated camera
+// hand holding still at each target) must save it and return to the settings screen.
+async function checkCalibration(app, only) {
+  const KNOWN = { offsetX: 0.08, offsetY: -0.05, scale: 1.4 };
+  const sens = app.settings.get('sensitivity');
+  const toRaw = (t, c, k = sens * c.scale) => ({ x: 0.5 + (t.x - 0.5) / k - c.offsetX, y: 0.5 + (t.y - 0.5) / k - c.offsetY });
+  const close = (a, b) => ['offsetX', 'offsetY', 'scale'].every((key) => Math.abs(a[key] - b[key]) < 0.01);
+  const fit = fitCalibration(TARGETS.map((t) => ({ raw: toRaw(t, KNOWN), target: t })), sens);
+  const rejectsStill = fitCalibration(TARGETS.map((t) => ({ raw: { x: 0.5, y: 0.5 }, target: t })), sens) === null;
+
+  const before = { ...app.settings.get('calibration') };
+  const realUpdate = app.input.update.bind(app.input);
+  let hand = null;
+  app.input.update = (dt) => ({ ...realUpdate(dt), source: 'camera', rawHands: hand ? [hand] : [] });
+  try {
+    // Leaving early must restore the previous calibration.
+    await app.startGame(Calibration, { difficulty: 'normal', options: {} });
+    app.loop.stop();
+    for (let i = 0; i < 60 * 4; i++) app.tick(DT);
+    const identityWhileRunning = app.settings.get('calibration').scale === 1;
+    app.exitToMenu();
+    const restoredOnAbort = close(app.settings.get('calibration'), before);
+
+    await app.startGame(Calibration, { difficulty: 'normal', options: {} });
+    app.loop.stop();
+    for (let i = 0; i < 60 * 4; i++) app.tick(DT); // intro
+    for (const t of TARGETS) {
+      const r = toRaw(t, KNOWN);
+      for (let i = 0; i < 80; i++) {
+        hand = { x: r.x + 0.004 * Math.sin(i), y: r.y + 0.004 * Math.cos(i) }; // small tremor
+        app.tick(DT);
+      }
+      if (only && t === TARGETS[2]) return { image: true };
+    }
+    const phase = app.game?.phase;
+    for (let i = 0; i < 60 * 7 && app.game && !app.game.finished; i++) app.tick(DT);
+    await sleep(0);
+    return {
+      fitRecovered: !!fit && close(fit, KNOWN), rejectsStill, identityWhileRunning, restoredOnAbort,
+      phaseAfterTargets: phase, savedMatches: close(app.settings.get('calibration'), KNOWN), screen: app.screen,
+      settingsText: document.getElementById('out-calibration').textContent,
+    };
+  } finally {
+    app.input.update = realUpdate;
+    hand = null;
+    if (!only) { app.exitToMenu(); app.settings.set('calibration', before); }
+  }
+}
+
 export async function run(app) {
   const errors = [];
   window.addEventListener('error', (e) => errors.push(String(e.message)));
@@ -76,6 +127,15 @@ export async function run(app) {
 
   // ?smoke=<gameId> → only that mode, and stop mid-game (for screenshots).
   const only = params.get('smoke');
+  if (!only || only === 'calibration') {
+    try {
+      const res = await checkCalibration(app, only);
+      if (only) report.image = canvas.toDataURL('image/png');
+      else report.calibration = res;
+    } catch (err) {
+      errors.push(`calibration: ${err.stack ?? err}`);
+    }
+  }
   for (const Game of only ? GAMES.filter((g) => g.meta.id === only) : GAMES) {
     const id = Game.meta.id;
     const options = Object.fromEntries(Object.entries(Game.meta.options ?? {}).map(([k, d]) => [k, d.choices[0][0]]));

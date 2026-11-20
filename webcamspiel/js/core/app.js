@@ -8,6 +8,7 @@ import { Hud } from '../ui/hud.js';
 import { Menu } from '../ui/menu.js';
 import { SettingsScreen } from '../ui/settingsScreen.js';
 import { SetupScreen } from '../ui/setupScreen.js';
+import Calibration from '../games/calibration/index.js';
 import { show, $ } from '../ui/screens.js';
 
 // meta.options = { key: { label, default, choices } } → { key: value }
@@ -48,6 +49,7 @@ export class App {
     this.settingsScreen = new SettingsScreen({
       settings: this.settings,
       setCamera: (on) => this.setCamera(on),
+      onCalibrate: () => this.startGame(Calibration, { difficulty: 'normal', options: {} }),
       onBack: () => this.showScreen('menu'),
     });
   }
@@ -167,7 +169,7 @@ export class App {
       this.paused ? this.resume() : this.pause();
     }
     if (!this.paused && !this.game.finished) this.game.update(dt, state);
-    this.game.render(this.view.ctx);
+    this.game?.render(this.view.ctx);
   }
 
   pause() {
@@ -182,6 +184,9 @@ export class App {
   }
 
   onFinish({ score = 0, stats = {} } = {}) {
+    // Utility modes (calibration) keep no scores and return to the settings screen.
+    // Deferred: onFinish runs inside game.update(), so don't destroy the game mid-call.
+    if (this.GameClass.meta.utility) { queueMicrotask(() => this.exitToMenu('settings')); return; }
     const id = this.GameClass.meta.id;
     const rank = this.highscores.submit(id, {
       score, profileName: this.profiles.active.name, difficulty: this.config.difficulty,
@@ -190,12 +195,12 @@ export class App {
     this.showOverlay('Spiel vorbei', `Punkte: ${score}${rank ? ` · Platz ${rank} der Bestenliste` : ''}`, false);
   }
 
-  exitToMenu() {
+  exitToMenu(screen = 'menu') {
     this.loop.stop();
     this.game?.destroy();
     this.game = null;
     this.hideOverlay();
-    this.showScreen('menu');
+    this.showScreen(screen);
   }
 
   showOverlay(title, text, canResume) {

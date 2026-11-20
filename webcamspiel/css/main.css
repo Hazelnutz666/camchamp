@@ -22,6 +22,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 }
 .btn.ghost { background: transparent; border: 1px solid var(--muted); color: var(--text); }
 .btn:hover { filter: brightness(1.15); }
+.btn:disabled { opacity: .45; cursor: not-allowed; filter: none; }
 
 .menu-header { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; }
 .menu-header h1 { margin: 0; font-size: clamp(28px, 5vw, 48px); letter-spacing: 2px; }
@@ -52,6 +53,10 @@ select { background: var(--panel); color: var(--text); border: 1px solid var(--m
 
 .settings-grid { display: grid; gap: 14px; max-width: 480px; margin: 16px 0 24px; }
 .error { color: #ff6b6b; }
+.calibration-box { max-width: 480px; margin: 0 0 24px; padding: 16px 20px; background: var(--panel); border-radius: var(--radius); }
+.calibration-box h3 { margin: 0 0 8px; color: var(--accent-2); }
+.calibration-box p { margin: 0 0 12px; }
+.overlay-actions.start { justify-content: flex-start; }
 
 #game-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .hud { position: absolute; top: 12px; left: 12px; right: 72px; display: flex; gap: 20px; font-weight: 700; font-size: 20px; pointer-events: none; text-shadow: 0 2px 6px #000; }
